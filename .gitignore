@@ -1,0 +1,31 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Aa]rtifacts/
+[Tt]est[Rr]esult*/
+coverage/
+*.coverage
+*.coveragexml
+
+# IDE and user-specific files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+secrets.json
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# Contract-monitor working files
+eng/openapi/*.downloaded.yaml
+eng/openapi/*.normalized.yaml

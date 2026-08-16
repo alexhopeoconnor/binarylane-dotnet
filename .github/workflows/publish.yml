@@ -1,0 +1,186 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
+  NUGET_XMLDOC_MODE: skip
+
+jobs:
+  build:
+    name: Validate, test, and pack
+    if: github.repository == 'alexhopeoconnor/binarylane-dotnet'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      package_version: ${{ steps.package_version.outputs.value }}
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: 8.0.x
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+
+      - name: Verify the tagged commit is reachable from main
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Release tags must point to a commit reachable from main." >&2
+            exit 1
+          fi
+
+      - name: Assert tag, package version, and changelog agree
+        run: ./eng/assert-release-version.sh "${{ github.ref_name }}"
+
+      - name: Read package version
+        id: package_version
+        run: echo "value=$(./eng/read-package-version.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore locked dependencies
+        run: |
+          dotnet restore src/BinaryLane.Api/BinaryLane.Api.csproj --locked-mode
+          dotnet restore tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --locked-mode
+          dotnet restore examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj --locked-mode
+
+      - name: Build
+        run: |
+          dotnet build src/BinaryLane.Api/BinaryLane.Api.csproj --configuration Release --no-restore /p:ContinuousIntegrationBuild=true -p:BuildInParallel=false
+          dotnet build tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --configuration Release --no-restore /p:ContinuousIntegrationBuild=true -p:BuildInParallel=false
+          dotnet build examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj --configuration Release --no-restore /p:ContinuousIntegrationBuild=true -p:BuildInParallel=false
+
+      - name: Test
+        run: dotnet test tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --configuration Release --no-build -m:1
+
+      - name: Pack
+        run: >-
+          dotnet pack src/BinaryLane.Api/BinaryLane.Api.csproj
+          --configuration Release --no-build --output artifacts
+          -p:BuildInParallel=false
+
+      - name: Compile the demo against the packed package
+        run: ./eng/test-demo-package.sh artifacts
+
+      - name: Upload NuGet packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: nuget-packages
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish to NuGet.org
+    needs: build
+    if: github.repository == 'alexhopeoconnor/binarylane-dotnet'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Download NuGet packages
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: nuget-packages
+          path: artifacts
+
+      - name: Check trusted-publishing configuration
+        run: |
+          if [[ -z "${{ secrets.NUGET_USER }}" ]]; then
+            echo "Set the protected release-environment secret NUGET_USER to the NuGet.org username." >&2
+            exit 1
+          fi
+
+      - name: Authenticate to NuGet.org through GitHub OIDC
+        id: nuget_login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish package
+        env:
+          NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
+        run: >-
+          dotnet nuget push "artifacts/*.nupkg"
+          --source https://api.nuget.org/v3/index.json
+          --api-key "$NUGET_API_KEY"
+          --skip-duplicate
+
+      - name: Publish symbols
+        env:
+          NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for package in artifacts/*.snupkg; do
+            dotnet nuget push "$package" \
+              --source https://api.nuget.org/v3/index.json \
+              --api-key "$NUGET_API_KEY" \
+              --skip-duplicate
+          done
+
+  release:
+    name: Create GitHub Release
+    needs:
+      - build
+      - publish
+    if: github.repository == 'alexhopeoconnor/binarylane-dotnet'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Download NuGet packages
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: nuget-packages
+          path: artifacts
+
+      - name: Extract release notes
+        run: ./eng/extract-release-notes.sh "${{ needs.build.outputs.package_version }}" > release-notes.md
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_VERSION: ${{ needs.build.outputs.package_version }}
+          TAG_NAME: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          if gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$TAG_NAME" artifacts/* eng/openapi/contract.json --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG_NAME" \
+              --title "BinaryLane.Api $PACKAGE_VERSION" \
+              --notes-file release-notes.md \
+              --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG_NAME" artifacts/* eng/openapi/contract.json \
+              --title "BinaryLane.Api $PACKAGE_VERSION" \
+              --notes-file release-notes.md \
+              --verify-tag \
+              --repo "$GITHUB_REPOSITORY"
+          fi

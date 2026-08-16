@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>
+    <PackageId>BinaryLane.Api</PackageId>
+    <AssemblyName>BinaryLane.Api</AssemblyName>
+    <RootNamespace>BinaryLane.Api.V2</RootNamespace>
+    <Version>0.1.0-beta.1</Version>
+    <Authors>Alex Hope-O'Connor</Authors>
+    <Owners>alex.hope.oconnor</Owners>
+    <Copyright>Copyright © 2026 Alex Hope-O'Connor</Copyright>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <IsPackable>true</IsPackable>
+    <Description>Unofficial, typed .NET client for BinaryLane's v2 API.</Description>
+    <PackageTags>binarylane;api;cloud;vps;dns</PackageTags>
+    <PackageProjectUrl>https://github.com/alexhopeoconnor/binarylane-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alexhopeoconnor/binarylane-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Pack must serialize multi-target nuspec and symbols generation. -->
+    <BuildInParallel>false</BuildInParallel>
+  </PropertyGroup>
+
+  <!-- Versions are centrally managed by Directory.Packages.props. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" Link="README.md" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" Link="LICENSE" />
+    <None Include="icon.png" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

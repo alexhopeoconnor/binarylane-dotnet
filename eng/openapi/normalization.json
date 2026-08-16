@@ -1,0 +1,64 @@
+{
+  "input": "binarylane-v2.openapi.yaml",
+  "normalizationRules": [
+    {
+      "kind": "exclude-paths-containing",
+      "value": "#",
+      "reason": "The upstream document uses fragment-bearing paths to document variants of the one real server actions endpoint. A URI fragment is never sent in an HTTP request."
+    },
+    {
+      "kind": "preserve-discriminator",
+      "schema": "ServerAction",
+      "property": "type",
+      "reason": "The action body is a discriminated union. Do not flatten or silently discard the discriminator mapping when generating test fixtures or internal wire code."
+    },
+    {
+      "kind": "open-enum",
+      "reason": "Provider enum values are represented as strings in public DTOs so new upstream values remain readable by existing SDK versions."
+    }
+  ],
+  "excludedPaths": [
+    "/v2/servers/{server_id}/actions#AddDisk",
+    "/v2/servers/{server_id}/actions#AttachBackup",
+    "/v2/servers/{server_id}/actions#ChangeAdvancedFeatures",
+    "/v2/servers/{server_id}/actions#ChangeAdvancedFirewallRules",
+    "/v2/servers/{server_id}/actions#ChangeBackupSchedule",
+    "/v2/servers/{server_id}/actions#ChangeIpv6",
+    "/v2/servers/{server_id}/actions#ChangeIpv6ReverseNameservers",
+    "/v2/servers/{server_id}/actions#ChangeKernel",
+    "/v2/servers/{server_id}/actions#ChangeManageOffsiteBackupCopies",
+    "/v2/servers/{server_id}/actions#ChangeNetwork",
+    "/v2/servers/{server_id}/actions#ChangeOffsiteBackupLocation",
+    "/v2/servers/{server_id}/actions#ChangePartner",
+    "/v2/servers/{server_id}/actions#ChangePortBlocking",
+    "/v2/servers/{server_id}/actions#ChangeRegion",
+    "/v2/servers/{server_id}/actions#ChangeReverseName",
+    "/v2/servers/{server_id}/actions#ChangeSeparatePrivateNetworkInterface",
+    "/v2/servers/{server_id}/actions#ChangeSourceAndDestinationCheck",
+    "/v2/servers/{server_id}/actions#ChangeThresholdAlerts",
+    "/v2/servers/{server_id}/actions#ChangeVpcIpv4",
+    "/v2/servers/{server_id}/actions#CloneUsingBackup",
+    "/v2/servers/{server_id}/actions#DeleteDisk",
+    "/v2/servers/{server_id}/actions#DetachBackup",
+    "/v2/servers/{server_id}/actions#DisableBackups",
+    "/v2/servers/{server_id}/actions#DisableSelinux",
+    "/v2/servers/{server_id}/actions#EnableBackups",
+    "/v2/servers/{server_id}/actions#EnableIpv6",
+    "/v2/servers/{server_id}/actions#IsRunning",
+    "/v2/servers/{server_id}/actions#PasswordReset",
+    "/v2/servers/{server_id}/actions#Ping",
+    "/v2/servers/{server_id}/actions#PowerCycle",
+    "/v2/servers/{server_id}/actions#PowerOff",
+    "/v2/servers/{server_id}/actions#PowerOn",
+    "/v2/servers/{server_id}/actions#Reboot",
+    "/v2/servers/{server_id}/actions#Rebuild",
+    "/v2/servers/{server_id}/actions#Rename",
+    "/v2/servers/{server_id}/actions#Resize",
+    "/v2/servers/{server_id}/actions#ResizeDisk",
+    "/v2/servers/{server_id}/actions#Restore",
+    "/v2/servers/{server_id}/actions#Shutdown",
+    "/v2/servers/{server_id}/actions#TakeBackup",
+    "/v2/servers/{server_id}/actions#Uncancel",
+    "/v2/servers/{server_id}/actions#Uptime"
+  ]
+}

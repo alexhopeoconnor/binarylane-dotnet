@@ -1,0 +1,56 @@
+name: CodeQL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '31 4 * * 4'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze C#
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: 8.0.x
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4
+        with:
+          languages: csharp
+          build-mode: manual
+
+      - name: Restore locked dependencies
+        run: |
+          dotnet restore src/BinaryLane.Api/BinaryLane.Api.csproj --locked-mode
+          dotnet restore tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --locked-mode
+          dotnet restore examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj --locked-mode
+
+      - name: Build for analysis
+        run: |
+          dotnet build src/BinaryLane.Api/BinaryLane.Api.csproj --configuration Release --no-restore -p:BuildInParallel=false
+          dotnet build tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --configuration Release --no-restore -p:BuildInParallel=false
+          dotnet build examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj --configuration Release --no-restore -p:BuildInParallel=false
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4

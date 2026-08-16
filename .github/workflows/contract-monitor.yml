@@ -1,0 +1,92 @@
+name: Monitor upstream OpenAPI contract
+
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: contract-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check BinaryLane OpenAPI contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Compare live contract with the reviewed snapshot
+        id: contract
+        shell: bash
+        run: |
+          set +e
+          ./eng/verify-openapi-contract.sh > contract-check.txt 2>&1
+          status=$?
+          set -e
+
+          cat contract-check.txt
+          case "$status" in
+            0)
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              ;;
+            1)
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "The contract check could not complete (exit $status)." >&2
+              exit "$status"
+              ;;
+          esac
+
+      - name: Upload contract-check report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: contract-check
+          path: contract-check.txt
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Open one review issue for contract drift
+        if: steps.contract.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          existing_count="$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --search 'in:title "BinaryLane OpenAPI contract changed"' \
+            --json number \
+            --jq 'length')"
+
+          if [[ "$existing_count" -gt 0 ]]; then
+            echo "An upstream-contract review issue is already open."
+            exit 0
+          fi
+
+          {
+            echo "BinaryLane's public OpenAPI contract no longer matches the reviewed snapshot."
+            echo
+            echo "Review the upstream change before updating generated code or SDK behavior."
+            echo
+            echo "```text"
+            cat contract-check.txt
+            echo "```"
+            echo
+            echo "Suggested next step: run `./eng/refresh-openapi-contract.sh`, review the diff,"
+            echo "then update models, fixtures, API coverage, docs, and tests in one pull request."
+          } > issue-body.md
+
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "BinaryLane OpenAPI contract changed" \
+            --body-file issue-body.md
