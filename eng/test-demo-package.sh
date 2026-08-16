@@ -53,6 +53,7 @@ dotnet restore "$demo_project" \
     --source "$package_directory" \
     --source https://api.nuget.org/v3/index.json \
     --no-cache \
+    --disable-parallel \
     -p:RestoreLockedMode=false
 dotnet build "$demo_project" \
     --configuration Release \

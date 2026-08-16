@@ -8,17 +8,20 @@ backwards compatible unless a breaking change is explicitly planned.
 Install the SDK pinned in `global.json`, then run:
 
 ```bash
-dotnet restore src/BinaryLane.Api/BinaryLane.Api.csproj --locked-mode
-dotnet restore tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --locked-mode
-dotnet restore examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj --locked-mode
-dotnet build src/BinaryLane.Api/BinaryLane.Api.csproj -c Release --no-restore
-dotnet build tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj -c Release --no-restore
-dotnet build examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj -c Release --no-restore
-dotnet test tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj -c Release --no-build
+dotnet restore src/BinaryLane.Api/BinaryLane.Api.csproj --locked-mode --disable-parallel
+dotnet restore tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --locked-mode --disable-parallel
+dotnet restore examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj --locked-mode --disable-parallel
+dotnet build src/BinaryLane.Api/BinaryLane.Api.csproj -c Release --no-restore -m:1 -nodeReuse:false -p:BuildInParallel=false
+dotnet build tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj -c Release --no-restore -m:1 -nodeReuse:false -p:BuildInParallel=false
+dotnet build examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj -c Release --no-restore -m:1 -nodeReuse:false -p:BuildInParallel=false
+dotnet test tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj -c Release --no-build -m:1 -nodeReuse:false
 dotnet format src/BinaryLane.Api/BinaryLane.Api.csproj --verify-no-changes --no-restore
 dotnet format tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --verify-no-changes --no-restore
 dotnet format examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj --verify-no-changes --no-restore
 ```
+
+Run these commands sequentially. Do not run separate restore, build, test, or
+pack commands concurrently on the same checkout.
 
 The tracked demo application lives in
 `examples/BinaryLane.Api.Demo`. Configure a personal API token with user

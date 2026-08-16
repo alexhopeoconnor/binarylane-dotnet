@@ -2,25 +2,40 @@
 [Bb]in/
 [Oo]bj/
 [Aa]rtifacts/
+[Bb]enchmark[Dd]ot[Nn]et.[Aa]rtifacts/
 [Tt]est[Rr]esult*/
 coverage/
 *.coverage
 *.coveragexml
+*.nupkg
+*.snupkg
 
 # IDE and user-specific files
 .vs/
 .vscode/
+.idea/
+.dotnet/
 *.user
+*.userprefs
+*.rsuser
 *.suo
 *.userosscache
 *.sln.docstates
+*.DotSettings.user
 
 # Local configuration and credentials
 .env
 .env.*
 !.env.example
 appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
 secrets.json
+*.secrets.json
+*.pfx
+*.p12
+*.pem
+*.key
 
 # Operating-system files
 .DS_Store
