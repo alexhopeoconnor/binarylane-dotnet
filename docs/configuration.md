@@ -3,24 +3,25 @@
 ## Standard registration
 
 In an ASP.NET Core or generic-host application, `AddBinaryLaneApi` configures
-`IBinaryLaneClient` and the individual resource interfaces.
+`IBinaryLaneClient`, individual resource interfaces, and the underlying typed
+`HttpClient`.
 
 ```csharp
 builder.Services.AddBinaryLaneApi(options =>
 {
     options.ApiToken = builder.Configuration["BinaryLane:ApiToken"];
-    options.RequestTimeoutSeconds = 100;
 });
 ```
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `BaseUrl` | `https://api.binarylane.com.au/` | API base address. Leave unchanged for BinaryLane's public API. |
+| `BaseUrl` | `https://api.binarylane.com.au/` | Root URI used for API requests. |
 | `ApiToken` | none | Bearer token used by the default provider. |
 | `RequestTimeoutSeconds` | `100` | Timeout for an individual HTTP request. |
 
-The base URL must be an HTTPS URL without credentials, a query string, or a
-fragment. Options are validated when the application starts.
+`BaseUrl` must be an HTTPS URL without credentials, a query string, or a
+fragment. `BaseUrl` and `RequestTimeoutSeconds` are validated when the host
+starts; request timeouts can range from 1 to 300 seconds.
 
 ## Rotating tokens
 
@@ -36,7 +37,7 @@ builder.Services.AddSingleton<IBinaryLaneTokenProvider, VaultTokenProvider>();
 builder.Services.AddBinaryLaneApi(options => options.RequestTimeoutSeconds = 100);
 ```
 
-The provider is called for every request. Do not log the returned token.
+The provider is called for every outgoing request.
 
 ## Use without dependency injection
 
@@ -63,10 +64,10 @@ var client = new BinaryLaneClient(
 telemetry, or other application-specific handlers.
 
 ```csharp
-builder.Services.AddBinaryLaneApi(options => options.ApiToken = token)
+builder.Services.AddBinaryLaneApi(options =>
+    options.ApiToken = builder.Configuration["BinaryLane:ApiToken"])
     .ConfigureHttpClient(client => client.DefaultRequestHeaders.Add("X-App", "my-service"));
 ```
 
-Only add automatic retries when the request is safe to repeat. In particular,
-POST, PUT, PATCH, and DELETE requests may have already been applied when a
-network failure is reported.
+The client does not apply retries itself. Applications can add their own
+handlers through the returned `IHttpClientBuilder`.

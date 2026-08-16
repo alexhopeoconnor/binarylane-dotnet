@@ -9,25 +9,24 @@
 dotnet add package BinaryLane.Api --prerelease
 ```
 
-## 2. Store the token safely
+## 2. Configure the API token
 
-For local development, initialise user secrets for your application and add
-the token:
+For local development, .NET user secrets can provide the
+`BinaryLane:ApiToken` configuration value:
 
 ```bash
 dotnet user-secrets init
 dotnet user-secrets set "BinaryLane:ApiToken" "your-token"
 ```
 
-For hosted applications, use the platform's secret store or supply
-`BINARYLANE_API_TOKEN` at runtime.
+The registration below reads that value first, then falls back to
+`BINARYLANE_API_TOKEN`.
 
 ## 3. Register the client
 
 ```csharp
 using BinaryLane.Api.V2;
 using BinaryLane.Api.V2.DependencyInjection;
-using BinaryLane.Api.V2.Models;
 
 builder.Services.AddBinaryLaneApi(options =>
 {
@@ -42,6 +41,9 @@ builder.Services.AddBinaryLaneApi(options =>
 Inject `IBinaryLaneClient`, then select the resource you need:
 
 ```csharp
+using BinaryLane.Api.V2;
+using BinaryLane.Api.V2.Models;
+
 public sealed class ServerReader(IBinaryLaneClient binaryLane)
 {
     public IAsyncEnumerable<Server> ListAsync(CancellationToken cancellationToken) =>

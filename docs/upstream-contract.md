@@ -28,8 +28,7 @@ snapshot makes those changes visible during SDK maintenance.
 The raw document includes virtual `#ActionName` paths for individual server
 action variants. They exist to improve the provider's reference UI but are not
 HTTP paths. `eng/normalize-openapi.sh` strips them when producing a normalized
-document for code generation or coverage checks. Do not issue requests to
-those virtual paths.
+document for route and coverage validation.
 
 ## Monitoring and updating
 

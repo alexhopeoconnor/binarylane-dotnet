@@ -20,12 +20,11 @@ dotnet format tests/BinaryLane.Api.Tests/BinaryLane.Api.Tests.csproj --verify-no
 dotnet format examples/BinaryLane.Api.Demo/BinaryLane.Api.Demo.csproj --verify-no-changes --no-restore
 ```
 
-Run these commands sequentially. Do not run separate restore, build, test, or
-pack commands concurrently on the same checkout.
+Run these commands one at a time. The serial options keep local build resource
+use predictable on a shared checkout.
 
-The tracked demo application lives in
-`examples/BinaryLane.Api.Demo`. Configure a personal API token with user
-secrets; never put it in a file, test fixture, issue, pull request, or commit.
+The tracked demo application lives in `examples/BinaryLane.Api.Demo`. It reads
+`BinaryLane:ApiToken` from its configuration providers, including user secrets.
 
 ```bash
 dotnet user-secrets set \

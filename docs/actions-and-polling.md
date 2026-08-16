@@ -43,6 +43,3 @@ if (action.Status == BinaryLaneValues.ActionStatus.Completed)
     // Continue with the next step.
 }
 ```
-
-If an action request has an uncertain outcome, retrieve the action or server
-state before submitting it again.

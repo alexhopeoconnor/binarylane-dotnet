@@ -57,7 +57,8 @@ section for release notes.
 
 ## Recovery
 
-NuGet packages cannot be overwritten. If a release has a packaging defect,
-unlist it if appropriate, publish a new version, and document the correction
-in the changelog. Do not retag a version or attempt to reuse a published
-package version.
+NuGet packages cannot be overwritten. If a published release has a packaging
+defect, unlist it if appropriate, publish a new version, and document the
+correction in the changelog. A tag can be replaced only before the workflow
+publishes its matching NuGet version; published package versions are never
+reused.

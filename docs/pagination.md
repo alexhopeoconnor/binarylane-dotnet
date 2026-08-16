@@ -27,5 +27,4 @@ await foreach (var server in client.Servers.ListAllAsync(cancellationToken: canc
 }
 ```
 
-Pass a cancellation token from the calling request, worker, or command so a
-stopped operation does not continue fetching pages.
+The cancellation token is carried across page requests made by `ListAllAsync`.

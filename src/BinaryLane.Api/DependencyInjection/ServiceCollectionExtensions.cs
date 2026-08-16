@@ -13,8 +13,8 @@ namespace BinaryLane.Api.V2.DependencyInjection;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers a typed BinaryLane client. The returned builder lets an application compose its
-    /// own proxy, telemetry, and safe GET-only resilience handlers.
+    /// Registers a typed BinaryLane client. The returned builder supports application-specific
+    /// HTTP client configuration.
     /// </summary>
     public static IHttpClientBuilder AddBinaryLaneApi(
         this IServiceCollection services,

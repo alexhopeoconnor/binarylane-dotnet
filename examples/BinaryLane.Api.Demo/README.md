@@ -13,8 +13,7 @@ dotnet user-secrets set \
   --project examples/BinaryLane.Api.Demo
 ```
 
-Alternatively, set `BINARYLANE_API_TOKEN` for one process. Do not add a token
-to `appsettings.json`.
+Alternatively, start the process with `BINARYLANE_API_TOKEN` set.
 
 ## Run it
 

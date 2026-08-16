@@ -10,8 +10,8 @@ version change.
 
 The raw document contains virtual paths such as
 `/v2/servers/{server_id}/actions#PowerOn`. These are API-reference aliases for
-action payload variants, not real HTTP routes. Coverage and generated-code
-checks must use the normalized contract and count only the real
+action payload variants, not real HTTP routes. Coverage checks and route
+reviews use the normalized contract and count only the real
 `POST /v2/servers/{server_id}/actions` route.
 
 | API area | Public resource boundary |

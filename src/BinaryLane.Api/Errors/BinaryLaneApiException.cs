@@ -32,10 +32,7 @@ public class BinaryLaneApiException : Exception
     /// <summary>Structured problem details, when BinaryLane supplied them.</summary>
     public BinaryLaneApiProblem? Problem { get; }
 
-    /// <summary>
-    /// Bounded raw response text for diagnostics. It omits request headers, but can contain
-    /// provider-supplied or user-provided data; avoid logging it indiscriminately.
-    /// </summary>
+    /// <summary>Bounded raw response text for diagnostics.</summary>
     public string? ResponseBody { get; }
 
     /// <summary>Response and content headers.</summary>

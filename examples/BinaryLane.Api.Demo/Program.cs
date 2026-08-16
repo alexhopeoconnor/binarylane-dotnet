@@ -44,7 +44,7 @@ internal static class DemoProgram
         {
             Console.Error.WriteLine(
                 "No API token is configured. Use user secrets or set BINARYLANE_API_TOKEN. "
-                + "Run with --help for a safe setup command.");
+                + "Run with --help for a setup command.");
             return 2;
         }
 
@@ -104,8 +104,7 @@ internal static class DemoProgram
         }
         catch (BinaryLaneApiException exception)
         {
-            // Provider details may contain user data. Do not print Problem, headers,
-            // or ResponseBody in a sample application.
+            // The sample prints the response status and path only.
             Console.Error.WriteLine(
                 $"BinaryLane request failed with HTTP {(int)exception.StatusCode} "
                 + $"({exception.StatusCode}) at {exception.RequestUri.AbsolutePath}.");
@@ -160,8 +159,7 @@ internal static class DemoProgram
               server <positive-server-id>
               regions
 
-            You can also set BINARYLANE_API_TOKEN for one process. Never commit
-            a token or add it to appsettings.json.
+            You can also set BINARYLANE_API_TOKEN for one process.
             """);
     }
 }

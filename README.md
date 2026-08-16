@@ -10,8 +10,8 @@ balancers, VPCs, and other v2 resources.
 See the [BinaryLane API reference](https://api.binarylane.com.au/reference/) for
 provider-specific API behaviour.
 
-BinaryLane describes its API as a developer preview. Pin the package version
-used by production applications and review release notes before upgrading.
+BinaryLane describes its API as a developer preview. SDK releases track the
+committed upstream contract independently of the provider's reference version.
 
 > This project is not affiliated with, endorsed by, or supported by BinaryLane.
 > For account or infrastructure support, use
@@ -27,8 +27,8 @@ Remove `--prerelease` once a stable package version is available.
 
 ## Quick start
 
-Keep the API token in a secret store, user secrets, or an environment variable.
-Do not commit it to configuration or source control.
+The registration below reads `BinaryLane:ApiToken` from application
+configuration and otherwise uses `BINARYLANE_API_TOKEN`.
 
 ```csharp
 using BinaryLane.Api.V2;
@@ -65,8 +65,7 @@ static async Task ListServersAsync(
 }
 ```
 
-List methods support `CancellationToken`. Mutating calls are sent once; add a
-retry policy only when the operation is known to be safe to repeat.
+All asynchronous resource methods accept a `CancellationToken`.
 
 ## Documentation
 
@@ -76,7 +75,7 @@ retry policy only when the operation is known to be safe to repeat.
 | [Configuration](https://github.com/alexhopeoconnor/binarylane-dotnet/blob/main/docs/configuration.md) | Tokens, timeouts, direct construction, and HTTP configuration. |
 | [Pagination](https://github.com/alexhopeoconnor/binarylane-dotnet/blob/main/docs/pagination.md) | Working with pages or async enumeration. |
 | [Actions](https://github.com/alexhopeoconnor/binarylane-dotnet/blob/main/docs/actions-and-polling.md) | Submitting and optionally waiting for server actions. |
-| [Error handling](https://github.com/alexhopeoconnor/binarylane-dotnet/blob/main/docs/errors.md) | Handling API failures safely. |
+| [Error handling](https://github.com/alexhopeoconnor/binarylane-dotnet/blob/main/docs/errors.md) | HTTP exceptions and diagnostic information. |
 | [Demo](https://github.com/alexhopeoconnor/binarylane-dotnet/tree/main/examples/BinaryLane.Api.Demo) | Running the included read-only console app. |
 
 ## Compatibility

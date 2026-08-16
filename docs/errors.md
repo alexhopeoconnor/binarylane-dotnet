@@ -1,13 +1,15 @@
 # Error handling
 
-All API failures derive from `BinaryLaneApiException`.
+`BinaryLaneApiException` represents a non-success response from the BinaryLane
+API. Network, timeout, cancellation, and client-configuration failures use
+their standard .NET exception types.
 
 | Exception | When it is used |
 | --- | --- |
-| `BinaryLaneUnauthorizedException` | The token is missing, invalid, or expired. |
-| `BinaryLaneForbiddenException` | The token does not have access to the resource. |
-| `BinaryLaneNotFoundException` | The requested resource does not exist or is not visible to the token. |
-| `BinaryLaneValidationException` | BinaryLane rejected the request payload. |
+| `BinaryLaneUnauthorizedException` | BinaryLane returned HTTP 401. |
+| `BinaryLaneForbiddenException` | BinaryLane returned HTTP 403. |
+| `BinaryLaneNotFoundException` | BinaryLane returned HTTP 404. |
+| `BinaryLaneValidationException` | BinaryLane returned HTTP 400 or 422. |
 | `BinaryLaneApiException` | Any other non-success HTTP response. |
 
 ```csharp
@@ -32,9 +34,9 @@ catch (BinaryLaneApiException exception)
 ```
 
 Each exception provides `StatusCode`, `RequestUri`, `Headers`, and, when
-available, `Problem` and `ResponseBody`. Provider detail text can contain user
-data. Do not write `Problem`, `Headers`, or `ResponseBody` to application logs
-without appropriate redaction.
+available, `Problem` and `ResponseBody`. `ResponseBody` contains at most the
+first 32,768 characters of diagnostic text, followed by an ellipsis when
+truncated.
 
-Successful JSON responses are limited to 16 MiB. A larger response throws
+Successful response bodies are limited to 16 MiB. A larger response throws
 `HttpRequestException` before the client buffers it in memory.
