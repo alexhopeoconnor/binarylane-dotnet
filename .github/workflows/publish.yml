@@ -171,16 +171,23 @@ jobs:
           TAG_NAME: ${{ github.ref_name }}
         shell: bash
         run: |
+          release_flags=()
+          if [[ "$PACKAGE_VERSION" == *-* ]]; then
+            release_flags+=(--prerelease)
+          fi
+
           if gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release upload "$TAG_NAME" artifacts/* eng/openapi/contract.json --clobber --repo "$GITHUB_REPOSITORY"
             gh release edit "$TAG_NAME" \
               --title "BinaryLane.Api $PACKAGE_VERSION" \
               --notes-file release-notes.md \
+              "${release_flags[@]}" \
               --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$TAG_NAME" artifacts/* eng/openapi/contract.json \
               --title "BinaryLane.Api $PACKAGE_VERSION" \
               --notes-file release-notes.md \
               --verify-tag \
+              "${release_flags[@]}" \
               --repo "$GITHUB_REPOSITORY"
           fi

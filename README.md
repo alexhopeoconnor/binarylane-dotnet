@@ -20,10 +20,8 @@ committed upstream contract independently of the provider's reference version.
 ## Install
 
 ```bash
-dotnet add package BinaryLane.Api --prerelease
+dotnet add package BinaryLane.Api
 ```
-
-Remove `--prerelease` once a stable package version is available.
 
 ## Quick start
 

@@ -6,7 +6,7 @@
 ## 1. Install the package
 
 ```bash
-dotnet add package BinaryLane.Api --prerelease
+dotnet add package BinaryLane.Api
 ```
 
 ## 2. Configure the API token

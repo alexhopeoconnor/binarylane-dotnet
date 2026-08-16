@@ -35,8 +35,8 @@ policy for this exact repository/workflow/environment identity.
    leading `v`.
 
 ```bash
-git tag -a v0.1.0-beta.1 -m "BinaryLane.Api 0.1.0-beta.1"
-git push origin v0.1.0-beta.1
+git tag -a v<package-version> -m "BinaryLane.Api <package-version>"
+git push origin v<package-version>
 ```
 
 6. Approve the protected `release` environment in GitHub Actions.
