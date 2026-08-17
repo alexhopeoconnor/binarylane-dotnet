@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Text.Json;
 using BinaryLane.Api.V2.Http;
 using BinaryLane.Api.V2.Models;
@@ -145,5 +147,28 @@ public sealed class ModelSerializationTests
         Assert.Equal("future_action", future.Type);
         Assert.NotNull(future.AdditionalProperties);
         Assert.Equal("kept", future.AdditionalProperties!["provider_option"].GetString());
+    }
+
+    [Fact]
+    public void EveryConcreteServerActionRoundTripsThroughItsProviderDiscriminator()
+    {
+        var actionTypes = typeof(ServerAction).Assembly
+            .GetTypes()
+            .Where(type =>
+                type.IsSealed &&
+                type.IsSubclassOf(typeof(ServerAction)) &&
+                type.GetConstructor(Type.EmptyTypes) is not null)
+            .OrderBy(type => type.Name, StringComparer.Ordinal);
+
+        foreach (var actionType in actionTypes)
+        {
+            var action = (ServerAction)Activator.CreateInstance(actionType)!;
+            string json = JsonSerializer.Serialize<ServerAction>(action, Json);
+            ServerAction? deserialized = JsonSerializer.Deserialize<ServerAction>(json, Json);
+
+            Assert.NotNull(deserialized);
+            Assert.Equal(actionType, deserialized.GetType());
+            Assert.Equal(action.Type, deserialized.Type);
+        }
     }
 }

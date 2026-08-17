@@ -51,11 +51,11 @@ public sealed class ServerActionJsonConverter : JsonConverter<ServerAction>
     public override void Write(Utf8JsonWriter writer, ServerAction value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
-        writer.WriteString("type", value.Type);
+        writer.WriteString(ServerActionJsonNames.Type, value.Type);
 
         var writtenProperties = new HashSet<string>(StringComparer.Ordinal)
         {
-            "type",
+            ServerActionJsonNames.Type,
         };
 
         foreach (PropertyInfo property in GetPayloadProperties(value.GetType()))
@@ -95,7 +95,7 @@ public sealed class ServerActionJsonConverter : JsonConverter<ServerAction>
 
     private static string ReadType(JsonElement action)
     {
-        if (!action.TryGetProperty("type", out JsonElement typeElement) ||
+        if (!action.TryGetProperty(ServerActionJsonNames.Type, out JsonElement typeElement) ||
             typeElement.ValueKind != JsonValueKind.String ||
             string.IsNullOrWhiteSpace(typeElement.GetString()))
         {
@@ -156,7 +156,7 @@ public sealed class ServerActionJsonConverter : JsonConverter<ServerAction>
     {
         var knownProperties = new HashSet<string>(StringComparer.Ordinal)
         {
-            "type",
+            ServerActionJsonNames.Type,
         };
 
         foreach (PropertyInfo property in GetPayloadProperties(action.GetType()))

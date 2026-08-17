@@ -137,7 +137,7 @@ public sealed class BinaryLaneHttpExecutor : IBinaryLaneApiExecutor
         object? body = null,
         IReadOnlyDictionary<string, object?>? query = null,
         CancellationToken cancellationToken = default) =>
-        (await SendAsync<TResponse>(new BinaryLaneRequest(new HttpMethod("PATCH"), path) { Body = body, Query = query }, cancellationToken)
+        (await SendAsync<TResponse>(new BinaryLaneRequest(BinaryLaneHttpMethods.Patch, path) { Body = body, Query = query }, cancellationToken)
             .ConfigureAwait(false)).Body;
 
     /// <inheritdoc />
