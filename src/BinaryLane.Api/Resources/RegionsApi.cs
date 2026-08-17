@@ -34,15 +34,3 @@ public sealed class RegionsApi : BinaryLaneResourceBase, IRegionsApi
     public IAsyncEnumerable<Region> ListAllAsync(PageRequest? page = null, CancellationToken cancellationToken = default) =>
         GetAllPagesAsync<Region>("v2/regions", "regions", page, null, cancellationToken);
 }
-
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using BinaryLane.Api.V2.Http;
-using BinaryLane.Api.V2.Models;
-using BinaryLane.Api.V2.Pagination;
-
-namespace BinaryLane.Api.V2.Resources;
